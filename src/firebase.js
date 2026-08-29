@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBS1_AO3dxqy83-p5zRjGFEIvi-SyKaaxI",
@@ -14,3 +16,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const authInstance = getAuth(app);
+export const storage = getStorage(app);
+
+enableIndexedDbPersistence(db).catch(() => {});
+
+export let analytics = null;
+isSupported().then((ok) => {
+  if (ok) analytics = getAnalytics(app);
+});
