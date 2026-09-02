@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /aadhaar/{mobile} {
+      // Only the specific admin account can VIEW photos — must match the
+      // same email as firestore.rules isAdmin(). Photos are never exposed
+      // via a permanent public link (the app no longer generates one).
+      allow read: if request.auth != null
+        && request.auth.token.email == 'usysknate@gmail.com';
+      // Workers upload their own photo during registration — no login needed
+      // for this, but only once per mobile number (no overwrite after).
+      allow create: if resource == null
+        && mobile.matches('^[6-9][0-9]{9}$')
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
