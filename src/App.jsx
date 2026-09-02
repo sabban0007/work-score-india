@@ -8,16 +8,16 @@ import { db, authInstance as auth, storage } from "./firebase";
 const C = {
   bg: "#ffffff",
   card: "#ffffff",
-  border: "#ececec",
-  text: "#171717",
-  subtext: "#8a8a8a",
-  accent: "#4f6fbf",
-  accentDim: "#eef2fb",
+  border: "#C8C8C8",
+  text: "#000000",
+  subtext: "#6b6b6b",
+  accent: "#000000",
+  accentDim: "#B2C8ED",
   green: "#2f8f4e",
   greenBg: "#eaf7ee",
   red: "#d64545",
-  input: "#fafafa",
-  navy: "#171717"
+  input: "#E4E4E4",
+  navy: "#000000"
 };
 
 const LANGS = {
@@ -354,6 +354,16 @@ export default function App() {
         ) : null}
       </main>
 
+      {savedMsg && (
+        <div style={{
+          position: "fixed", bottom: 78, left: "50%", transform: "translateX(-50%)", zIndex: 30,
+          display: "flex", alignItems: "center", gap: 8, background: "#000000", color: "#ffffff",
+          fontSize: 13, padding: "10px 18px", borderRadius: 999, boxShadow: "0 6px 20px rgba(0,0,0,0.25)"
+        }} className="fade-in">
+          <CheckCircle2 size={16} /> {t.successMsg}
+        </div>
+      )}
+
       <div style={{ textAlign: "center", padding: "0 20px 24px", fontSize: 11, color: C.subtext }}>
         <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: C.subtext, textDecoration: "underline", marginRight: 14 }}>Privacy Policy</a>
         <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: C.subtext, textDecoration: "underline" }}>Terms of Service</a>
@@ -410,11 +420,6 @@ function WorkerRegisterView({ t, form, setForm, onSubmit, savedMsg, skills, form
   return (
     <div className="fade-in" style={{ maxWidth: 420 }}>
       <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{t.register}</h2>
-      {savedMsg && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, color: C.green, fontSize: 14, marginBottom: 12, background: C.greenBg, border: `1px solid ${C.green}`, borderRadius: 6, padding: "8px 12px" }}>
-          <CheckCircle2 size={16} /> {t.successMsg}
-        </div>
-      )}
       {formError && (
         <div style={{ color: C.red, fontSize: 13, marginBottom: 12, background: "#c0392b18", border: `1px solid ${C.red}`, borderRadius: 6, padding: "8px 12px" }}>
           {formError}
@@ -422,275 +427,4 @@ function WorkerRegisterView({ t, form, setForm, onSubmit, savedMsg, skills, form
       )}
       <form onSubmit={onSubmit} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
         <Field label={t.name}>
-          <input required maxLength={60} style={inputStyle} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <FieldError msg={formErrors.name} />
-        </Field>
-        <Field label={t.mobile}>
-          <input required type="tel" inputMode="numeric" maxLength={10} style={inputStyle} value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "") })} />
-          <FieldError msg={formErrors.mobile} />
-        </Field>
-        <Field label={t.city}>
-          <input maxLength={60} style={inputStyle} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-          <FieldError msg={formErrors.city} />
-        </Field>
-        <Field label={t.skill}>
-          <select style={inputStyle} value={form.skill} onChange={(e) => setForm({ ...form, skill: e.target.value })}>
-            {skills.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <FieldError msg={formErrors.skill} />
-        </Field>
-        {form.skill === "Other" && (
-          <Field label="Apna kaam likho">
-            <input maxLength={40} style={inputStyle} value={form.customSkill} onChange={(e) => setForm({ ...form, customSkill: e.target.value })} placeholder="jaise: Kumhar, Lohar, Darzi" />
-            <FieldError msg={formErrors.customSkill} />
-          </Field>
-        )}
-        <Field label={t.experience}>
-          <input type="number" min="0" max="60" style={inputStyle} value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} />
-          <FieldError msg={formErrors.experience} />
-        </Field>
-        <Field label={t.prevEmployer}>
-          <input maxLength={60} style={inputStyle} value={form.prevEmployer} onChange={(e) => setForm({ ...form, prevEmployer: e.target.value })} />
-        </Field>
-        <Field label={t.prevEmployerMobile}>
-          <input type="tel" inputMode="numeric" maxLength={10} style={inputStyle} value={form.prevEmployerMobile} onChange={(e) => setForm({ ...form, prevEmployerMobile: e.target.value.replace(/\D/g, "") })} />
-          <FieldError msg={formErrors.prevEmployerMobile} />
-        </Field>
-        <Field label="Aadhaar Photo (optional)">
-          <input type="file" accept="image/jpeg,image/png,image/webp" style={inputStyle} onChange={(e) => setAadhaarFile(e.target.files?.[0] || null)} />
-          <FieldError msg={formErrors.aadhaar} />
-        </Field>
-        <button type="submit" disabled={uploading} style={{ width: "100%", background: C.accent, color: "#ffffff", fontWeight: 700, border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, marginTop: 8, cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.6 : 1 }}>
-          {uploading ? "Photo upload ho rahi hai..." : t.submit}
-        </button>
-      </form>
-    </div>
-  );
-}
-
-function ScoreBadge({ score }) {
-  const color = score >= 70 ? C.green : score >= 40 ? C.accent : C.red;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-      <svg width="34" height="34" viewBox="0 0 36 36">
-        <circle cx="18" cy="18" r="15.5" fill="none" stroke={C.border} strokeWidth="3" />
-        <circle cx="18" cy="18" r="15.5" fill="none" stroke={color} strokeWidth="3"
-          strokeDasharray={`${(score / 100) * 97.4} 97.4`} strokeLinecap="round" transform="rotate(-90 18 18)" />
-      </svg>
-      <span style={{ fontSize: 14, fontWeight: 700, color }}>{score}</span>
-    </div>
-  );
-}
-
-function Badges({ w, t }) {
-  const badges = [
-    w.onTime && { icon: Clock, label: t.onTime },
-    w.emergencyReady && { icon: Zap, label: t.emergencyReady },
-    w.teamLeader && { icon: Users, label: t.teamLeader },
-    w.multiSkill && { icon: Wrench, label: t.multiSkill },
-    w.safe && { icon: ShieldAlert, label: t.safe }
-  ].filter(Boolean);
-  if (!badges.length) return null;
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-      {badges.map(({ icon: Icon, label }, i) => (
-        <span key={i} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, background: C.input, border: `1px solid ${C.border}`, borderRadius: 999, padding: "2px 8px", color: C.accent }}>
-          <Icon size={10} /> {label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function EmployerSearchView({ t, query, setQuery, filtered, onSelect }) {
-  return (
-    <div className="fade-in">
-      <div style={{ position: "relative", marginBottom: 16 }}>
-        <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: C.subtext }} />
-        <input
-          style={{ ...inputStyle, paddingLeft: 36 }}
-          placeholder={t.searchPlaceholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
-      {filtered.length === 0 ? (
-        <p style={{ color: C.subtext, fontSize: 14 }}>{t.noResults}</p>
-      ) : (
-        <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
-          {filtered.map((w) => {
-            const s = calcScore(w);
-            return (
-              <button key={w.id} onClick={() => onSelect(w)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, textAlign: "left", cursor: "pointer", color: C.text, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: C.input, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{w.photo}</div>
-                    <div>
-                      <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>{w.name}</p>
-                      <p style={{ fontSize: 11, color: C.subtext, margin: 0 }}>{w.skill} • {w.city || "—"}</p>
-                    </div>
-                  </div>
-                  <ScoreBadge score={s.total} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, fontSize: 11, color: C.subtext }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 3 }}><Star size={11} color={C.accent} fill={C.accent} /> {s.avgRating || "—"}</span>
-                  <span>• {w.jobsCompleted} {t.jobs}</span>
-                  {w.verifiedEmployers > 0 && <CheckCircle2 size={11} color={C.green} />}
-                </div>
-                <Badges w={w} t={t} />
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ProfileModal({ t, worker, onClose }) {
-  const s = calcScore(worker);
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "#000000a0", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 30, padding: 16 }} onClick={onClose}>
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, width: "100%", maxWidth: 420, borderRadius: 22, padding: 24, maxHeight: "85vh", overflowY: "auto", boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", background: C.input, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26 }}>{worker.photo}</div>
-            <div>
-              <p style={{ fontWeight: 600, margin: 0 }}>{worker.name}</p>
-              <p style={{ fontSize: 12, color: C.subtext, display: "flex", alignItems: "center", gap: 4, margin: "2px 0" }}><MapPin size={11} />{worker.city || "—"} • {worker.skill}</p>
-              <p style={{ fontSize: 12, color: C.subtext, display: "flex", alignItems: "center", gap: 4, margin: 0 }}><Phone size={11} />{worker.mobile}</p>
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: C.subtext, cursor: "pointer" }}><X size={18} /></button>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-          <ScoreBadge score={s.total} />
-          <span style={{ fontSize: 14, color: C.subtext }}>{t.workScore}</span>
-        </div>
-        <Badges w={worker} t={t} />
-        <div style={{ marginTop: 16, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
-          <p style={{ fontSize: 12, color: C.subtext, marginBottom: 8 }}>{t.scoreBreakdown}</p>
-          {[
-            [t.experience, s.exp, 25], ["Rating", s.ratingScore, 25],
-            [t.verified + " Employer", s.empScore, 20], [t.jobs, s.jobScore, 20], ["Docs", s.docScore, 10]
-          ].map(([label, val, max]) => (
-            <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
-              <span style={{ color: C.subtext }}>{label}</span>
-              <span>{val}/{max}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AdminLoginView({ t, loginForm, setLoginForm, onSubmit, error }) {
-  return (
-    <div className="fade-in" style={{ maxWidth: 360 }}>
-      <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Admin Login</h2>
-      <form onSubmit={onSubmit} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-        {error && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{error}</p>}
-        <Field label="Email">
-          <input required type="email" style={inputStyle} value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
-        </Field>
-        <Field label="Password">
-          <input required type="password" style={inputStyle} value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />
-        </Field>
-        <button type="submit" style={{ width: "100%", background: C.navy, color: "#ffffff", fontWeight: 700, border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, marginTop: 4, cursor: "pointer" }}>
-          Login
-        </button>
-      </form>
-    </div>
-  );
-}
-
-function AdminView({ t, workers, updateWorker, addRating, onLogout, adminEmail }) {
-  const [photoError, setPhotoError] = useState({});
-  async function viewAadhaarPhoto(mobile) {
-    setPhotoError((p) => ({ ...p, [mobile]: "" }));
-    try {
-      const blob = await getBlob(ref(storage, `aadhaar/${mobile}`));
-      const objUrl = URL.createObjectURL(blob);
-      window.open(objUrl, "_blank");
-    } catch (err) {
-      console.error("Photo fetch failed:", err);
-      setPhotoError((p) => ({ ...p, [mobile]: "Photo load nahi hui" }));
-    }
-  }
-  return (
-    <div className="fade-in">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{t.adminPanelTitle}</h2>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 11, color: C.subtext }}>{adminEmail}</span>
-          <button onClick={onLogout} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 6, background: C.input, border: `1px solid ${C.border}`, cursor: "pointer", color: C.text }}>
-            Logout
-          </button>
-        </div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {workers.map((w) => {
-          const s = calcScore(w);
-          return (
-            <div key={w.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: C.input, display: "flex", alignItems: "center", justifyContent: "center" }}>{w.photo}</div>
-                  <div>
-                    <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>{w.name}</p>
-                    <p style={{ fontSize: 11, color: C.subtext, margin: 0 }}>{w.skill} • {w.mobile}</p>
-                    {w.aadhaarPhotoUploaded && (
-                      <button onClick={() => viewAadhaarPhoto(w.mobile)} style={{ fontSize: 11, color: C.accent, textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                        Aadhaar photo dekho
-                      </button>
-                    )}
-                    {photoError[w.mobile] && <span style={{ fontSize: 11, color: C.red, display: "block" }}>{photoError[w.mobile]}</span>}
-                  </div>
-                </div>
-                <ScoreBadge score={s.total} />
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, fontSize: 12 }}>
-                <button
-                  onClick={() => updateWorker(w.id, { verifiedEmployers: Math.min(w.verifiedEmployers + 1, 3) })}
-                  style={{ padding: "5px 10px", borderRadius: 6, background: C.input, border: `1px solid ${C.border}`, color: C.text, cursor: "pointer" }}
-                >
-                  + {t.verifyEmployerBtn} ({w.verifiedEmployers})
-                </button>
-                <button
-                  onClick={() => updateWorker(w.id, { aadhaarVerified: !w.aadhaarVerified })}
-                  style={{ padding: "5px 10px", borderRadius: 6, cursor: "pointer", background: w.aadhaarVerified ? C.greenBg : C.input, border: `1px solid ${w.aadhaarVerified ? C.green : C.border}`, color: w.aadhaarVerified ? C.green : C.text }}
-                >
-                  {t.verifyDocBtn}
-                </button>
-                <button
-                  onClick={() => updateWorker(w.id, { mobileVerified: !w.mobileVerified })}
-                  style={{ padding: "5px 10px", borderRadius: 6, cursor: "pointer", background: w.mobileVerified ? C.greenBg : C.input, border: `1px solid ${w.mobileVerified ? C.green : C.border}`, color: w.mobileVerified ? C.green : C.text }}
-                >
-                  Mobile OTP
-                </button>
-                {["onTime", "emergencyReady", "teamLeader", "multiSkill", "safe"].map((key) => (
-                  <button
-                    key={key}
-                    onClick={() => updateWorker(w.id, { [key]: !w[key] })}
-                    style={{ padding: "5px 10px", borderRadius: 6, cursor: "pointer", background: w[key] ? C.accentDim : C.input, border: `1px solid ${w[key] ? C.accent : C.border}`, color: w[key] ? C.accent : C.subtext }}
-                  >
-                    {t[key] || key}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 8 }}>
-                <span style={{ fontSize: 11, color: C.subtext, marginRight: 4 }}>{t.giveRating}:</span>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button key={n} onClick={() => addRating(w.id, n)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
-                    <Star size={14} color={C.accent} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+          <input required 
